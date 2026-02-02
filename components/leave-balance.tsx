@@ -35,9 +35,9 @@ export default function LeaveBalanceCard({
       case 'SICK':
         return '🏥';
       case 'CASUAL':
-        return '🎉';
+        return '🌴';
       case 'EARNED':
-        return '⭐';
+        return '💼';
       default:
         return '📅';
     }

@@ -14,7 +14,14 @@ interface CalendarDay {
   isRangeEnd: boolean;
 }
 
-export default function KanbanCalendar() {
+interface KanbanCalendarProps {
+  leaveType?: string;
+  setStart: React.Dispatch<React.SetStateAction<string | null>>;
+  setEnd: React.Dispatch<React.SetStateAction<string | null>>;
+  onRequest?: () => void;
+}
+
+export default function KanbanCalendar({ leaveType, setStart, setEnd, onRequest}: KanbanCalendarProps) {
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
@@ -139,9 +146,25 @@ export default function KanbanCalendar() {
         console.log('[v0] Start date set:', formatDateString(newDate));
       } else {
         // If only start date exists, set end date
-        setEndDate(newDate);
-        console.log('[v0] End date set:', formatDateString(newDate));
-        console.log('[v0] Date range selected - Start: ', formatDateString(startDate), 'End: ', formatDateString(newDate));
+        // Ensure startDate is always the earlier date and endDate the later date
+        if (startDate && newDate < startDate) {
+          // Swap so that startDate is the earlier date
+          setStartDate(newDate);
+          setEndDate(startDate);
+          console.log('[v0] Dates swapped - Start: ', formatDateString(newDate), 'End: ', formatDateString(startDate));
+        } else {
+          setEndDate(newDate);
+          console.log('[v0] End date set:', formatDateString(newDate));
+        }
+        if (startDate) {
+          const rangeStart = newDate < startDate ? newDate : startDate;
+          const rangeEnd = newDate < startDate ? startDate : newDate;
+          const start = formatDateString(rangeStart);
+          const end = formatDateString(rangeEnd)
+          setStart(start);
+          setEnd(end);
+          console.log('[v0] Date range selected - Start: ', start, 'End: ', end);
+        }
       }
     }
   };
@@ -154,12 +177,14 @@ export default function KanbanCalendar() {
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-slide-in-left">
+          <h2 className="text-4xl font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-slide-in-left">
             {monthNames[displayMonth]} {displayYear}
           </h2>
           <p className="text-muted-foreground mt-2 animate-fade-in font-medium">
-            {displayMonth === currentMonth && displayYear === currentYear 
-              ? '📅 Current Month' 
+            {leaveType
+              ? `Planning ${leaveType} leave`
+              : displayMonth === currentMonth && displayYear === currentYear
+              ? '📅 Current Month'
               : `📆 ${monthNames[displayMonth]} ${displayYear}`}
           </p>
         </div>
@@ -283,6 +308,10 @@ export default function KanbanCalendar() {
                 </div>
               )}
             </div>
+            {/* Leave Requests Button */}
+            {endDate && (<button type='button' onClick={() => onRequest?.()} className="mt-4 px-6 py-2 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-accent/90 transition-colors active:scale-95">
+              Leave Requests
+            </button>)}
           </div>
         )}
       </div>

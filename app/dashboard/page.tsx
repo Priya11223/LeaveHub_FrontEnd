@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import LeaveBalanceCard from '@/components/leave-balance';
 import { ChevronDown, Calendar, LogOut, Loader2, AlertCircle } from 'lucide-react';
 import { useUser } from '@/lib/user-context';
+import { useRouter } from 'next/navigation';
 
 interface LeaveBalance {
   leaveType: string;
@@ -13,6 +14,7 @@ interface LeaveBalance {
 
 export default function DashboardPage() {
   const { user: contextUser } = useUser();
+  const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedLeaveType, setSelectedLeaveType] = useState<string | null>(null);
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
@@ -60,6 +62,7 @@ export default function DashboardPage() {
 
   const handleRequest = (leaveType: string) => {
     console.log('[v0] Request clicked:', leaveType);
+    router.push(`/dashboard/calendar?leaveType=${encodeURIComponent(leaveType)}`);
     // You can add navigation or modal logic here
   };
 
