@@ -5,11 +5,11 @@ import { CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
 interface LeaveRequest {
   id: string;
   leaveType: string;
-  startDate: string;
-  endDate: string;
-  days: number;
-  status: 'approved' | 'pending' | 'rejected' | 'cancelled';
-  appliedOn?: string;
+  start: string;
+  end: string;
+  noDays: number;
+  status: 'APPROVED' | 'PENDING' | 'REJECTED';
+  appliedDate?: string;
 }
 
 interface RequestCardProps {
@@ -19,33 +19,26 @@ interface RequestCardProps {
 export default function RequestCard({ request }: RequestCardProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'APPROVED':
         return {
           bg: 'bg-green-100',
           text: 'text-green-800',
           icon: CheckCircle,
-          label: 'Approved',
+          label: 'APPROVED',
         };
-      case 'pending':
+      case 'PENDING':
         return {
           bg: 'bg-blue-100',
           text: 'text-blue-800',
           icon: Clock,
-          label: 'Pending',
+          label: 'PENDING',
         };
-      case 'rejected':
+      case 'REJECTED':
         return {
           bg: 'bg-red-100',
           text: 'text-red-800',
           icon: XCircle,
-          label: 'Rejected',
-        };
-      case 'cancelled':
-        return {
-          bg: 'bg-gray-100',
-          text: 'text-gray-800',
-          icon: AlertCircle,
-          label: 'Cancelled',
+          label: 'REJECTED',
         };
       default:
         return {
@@ -96,7 +89,7 @@ export default function RequestCard({ request }: RequestCardProps) {
               {request.leaveType}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {request.days} {request.days === 1 ? 'day' : 'days'}
+              {request.noDays} {request.noDays === 1 ? 'Day' : 'Days'}
             </p>
           </div>
         </div>
@@ -114,7 +107,7 @@ export default function RequestCard({ request }: RequestCardProps) {
             Start Date
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {new Date(request.startDate).toLocaleDateString('en-US', {
+            {new Date(request.start).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
@@ -126,7 +119,7 @@ export default function RequestCard({ request }: RequestCardProps) {
             End Date
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {new Date(request.endDate).toLocaleDateString('en-US', {
+            {new Date(request.end).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
@@ -135,10 +128,10 @@ export default function RequestCard({ request }: RequestCardProps) {
         </div>
       </div>
 
-      {request.appliedOn && (
+      {request.appliedDate && (
         <p className="text-xs text-muted-foreground">
           Applied on{' '}
-          {new Date(request.appliedOn).toLocaleDateString('en-US', {
+          {new Date(request.appliedDate).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric',

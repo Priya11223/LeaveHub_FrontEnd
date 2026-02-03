@@ -1,101 +1,80 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import RequestCard from '@/components/request-card';
-import { ChevronDown, Calendar, LogOut, ArrowLeft } from 'lucide-react';
+import { ChevronDown, Calendar, LogOut, ArrowLeft, Loader2 } from 'lucide-react';
+import { useUser } from '@/lib/user-context';
+
 
 interface LeaveRequest {
   id: string;
   leaveType: string;
-  startDate: string;
-  endDate: string;
-  days: number;
-  status: 'approved' | 'pending' | 'rejected' | 'cancelled';
-  appliedOn: string;
+  start: string;
+  end: string;
+  noDays: number;
+  status: 'APPROVED' | 'PENDING' | 'REJECTED';
+  appliedDate: string;
 }
 
 export default function RequestsPage() {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const { user: contextUser } = useUser();
+  const [requests, setRequests] = useState<LeaveRequest[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Sample user data
   const user = {
-    name: 'John Doe',
-    email: 'john.doe@company.com',
-    department: 'Engineering',
+    name: contextUser?.name as string ?? 'User',
+    email: contextUser?.email as string ?? '',
+    jwt: contextUser?.jwt as string,
   };
 
-  // Sample leave requests data
-  const allRequests: LeaveRequest[] = [
-    {
-      id: '1',
-      leaveType: 'CASUAL',
-      startDate: '2026-02-10',
-      endDate: '2026-02-12',
-      days: 3,
-      status: 'approved',
-      appliedOn: '2026-01-28',
-    },
-    {
-      id: '2',
-      leaveType: 'EARNED',
-      startDate: '2026-03-15',
-      endDate: '2026-03-20',
-      days: 6,
-      status: 'pending',
-      appliedOn: '2026-02-01',
-    },
-    {
-      id: '3',
-      leaveType: 'SICK',
-      startDate: '2026-01-20',
-      endDate: '2026-01-21',
-      days: 2,
-      status: 'approved',
-      appliedOn: '2026-01-19',
-    },
-    {
-      id: '4',
-      leaveType: 'CASUAL',
-      startDate: '2025-12-22',
-      endDate: '2025-12-26',
-      days: 5,
-      status: 'rejected',
-      appliedOn: '2025-12-01',
-    },
-    {
-      id: '5',
-      leaveType: 'EARNED',
-      startDate: '2026-04-01',
-      endDate: '2026-04-05',
-      days: 5,
-      status: 'pending',
-      appliedOn: '2026-02-02',
-    },
-    {
-      id: '6',
-      leaveType: 'CASUAL',
-      startDate: '2025-11-10',
-      endDate: '2025-11-12',
-      days: 3,
-      status: 'cancelled',
-      appliedOn: '2025-11-01',
-    },
-  ];
+  //const requests: LeaveRequest[]
+  useEffect(() => {
+    if (!user.jwt) return;
+
+    async function fetchRequests() {
+      try {
+        setLoading(true);
+        const res = await fetch('http://localhost:8080/api/leaves/my', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${user.jwt}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch leave balance');
+        const data: LeaveRequest = await res.json();
+        setRequests(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.log('error is ' + err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRequests();
+  }, [user.jwt]);
+
+  const handleLogOut = () => {
+    localStorage.removeItem("leave-tracker-user")
+
+    router.replace("/")
+  }
 
   const filteredRequests = filterStatus
-    ? allRequests.filter((req) => req.status === filterStatus)
-    : allRequests;
+    ? requests.filter((req) => req.status === filterStatus)
+    : requests;
 
   const getStatusCounts = () => {
     return {
-      all: allRequests.length,
-      approved: allRequests.filter((r) => r.status === 'approved').length,
-      pending: allRequests.filter((r) => r.status === 'pending').length,
-      rejected: allRequests.filter((r) => r.status === 'rejected').length,
-      cancelled: allRequests.filter((r) => r.status === 'cancelled').length,
+      all: requests.length,
+      APPROVED: requests.filter((r) => r.status === 'APPROVED').length,
+      PENDING: requests.filter((r) => r.status === 'PENDING').length,
+      REJECTED: requests.filter((r) => r.status === 'REJECTED').length,
     };
   };
 
@@ -138,8 +117,7 @@ export default function RequestsPage() {
                   aria-haspopup="true"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
-                    {user.name
-                      .split(' ')
+                    {user.name.split(' ')
                       .map((n) => n[0])
                       .join('')}
                   </div>
@@ -159,23 +137,9 @@ export default function RequestsPage() {
                 {/* Dropdown menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border py-2 animate-fade-in">
-                    <div className="px-4 py-2 border-b border-border mb-2">
-                      <p className="text-sm font-semibold text-foreground">
-                        {user.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                    <button className="w-full text-left px-4 py-2 hover:bg-muted text-foreground text-sm flex items-center gap-2 transition-colors">
-                      <Calendar className="w-4 h-4" />
-                      Profile
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-muted text-foreground text-sm flex items-center gap-2 transition-colors">
-                      <Calendar className="w-4 h-4" />
-                      Settings
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2 transition-colors border-t border-border mt-2">
+                    <button 
+                        onClick={() => handleLogOut()}
+                        className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2 transition-colors border-t border-border mt-2">
                       <LogOut className="w-4 h-4" />
                       Logout
                     </button>
@@ -212,48 +176,44 @@ export default function RequestsPage() {
             All ({counts.all})
           </button>
           <button
-            onClick={() => setFilterStatus('approved')}
+            onClick={() => setFilterStatus('APPROVED')}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-              filterStatus === 'approved'
+              filterStatus === 'APPROVED'
                 ? 'bg-green-500 text-white'
                 : 'bg-muted text-foreground hover:bg-muted/80'
             }`}
           >
-            Approved ({counts.approved})
+            APPROVED ({counts.APPROVED})
           </button>
           <button
-            onClick={() => setFilterStatus('pending')}
+            onClick={() => setFilterStatus('PENDING')}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-              filterStatus === 'pending'
+              filterStatus === 'PENDING'
                 ? 'bg-blue-500 text-white'
                 : 'bg-muted text-foreground hover:bg-muted/80'
             }`}
           >
-            Pending ({counts.pending})
+            PENDING ({counts.PENDING})
           </button>
           <button
-            onClick={() => setFilterStatus('rejected')}
+            onClick={() => setFilterStatus('REJECTED')}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-              filterStatus === 'rejected'
+              filterStatus === 'REJECTED'
                 ? 'bg-red-500 text-white'
                 : 'bg-muted text-foreground hover:bg-muted/80'
             }`}
           >
-            Rejected ({counts.rejected})
-          </button>
-          <button
-            onClick={() => setFilterStatus('cancelled')}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-              filterStatus === 'cancelled'
-                ? 'bg-gray-500 text-white'
-                : 'bg-muted text-foreground hover:bg-muted/80'
-            }`}
-          >
-            Cancelled ({counts.cancelled})
+            REJECTED ({counts.REJECTED})
           </button>
         </div>
 
         {/* Request Cards Grid */}
+        {loading && (
+            <div className="col-span-full flex items-center justify-center gap-2 py-12 text-muted-foreground">
+              <Loader2 className="w-6 h-6 animate-spin" />
+              <span>Loading  Requests...</span>
+            </div>
+          )}
         {filteredRequests.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRequests.map((request, index) => (

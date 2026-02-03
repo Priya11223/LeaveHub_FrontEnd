@@ -60,6 +60,16 @@ export default function DashboardPage() {
     // You can add navigation or modal logic here
   };
 
+  const handleLogOut = () => {
+    localStorage.removeItem("leave-tracker-user")
+
+    router.replace("/")
+  }
+
+  const handleRequestHistory = () => {
+    router.push("/dashboard/requests");
+  }
+
   const handleRequest = (leaveType: string) => {
     console.log('[v0] Request clicked:', leaveType);
     router.push(`/dashboard/calendar?leaveType=${encodeURIComponent(leaveType)}`);
@@ -89,6 +99,7 @@ export default function DashboardPage() {
               <button
                 className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
                 aria-label="View leave requests"
+                onClick={() => handleRequestHistory()}
               >
                 <Calendar className="w-4 h-4" />
                 Requests History
@@ -124,23 +135,9 @@ export default function DashboardPage() {
                 {/* Dropdown menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border py-2 animate-fade-in">
-                    <div className="px-4 py-2 border-b border-border mb-2">
-                      <p className="text-sm font-semibold text-foreground">
-                        {userName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {userEmail}
-                      </p>
-                    </div>
-                    <button className="w-full text-left px-4 py-2 hover:bg-muted text-foreground text-sm flex items-center gap-2 transition-colors">
-                      <Calendar className="w-4 h-4" />
-                      Profile
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-muted text-foreground text-sm flex items-center gap-2 transition-colors">
-                      <Calendar className="w-4 h-4" />
-                      Settings
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2 transition-colors border-t border-border mt-2">
+                    <button 
+                      onClick={() => handleLogOut()}
+                      className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive text-sm flex items-center gap-2 transition-colors border-t border-border mt-2">
                       <LogOut className="w-4 h-4" />
                       Logout
                     </button>

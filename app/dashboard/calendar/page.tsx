@@ -24,7 +24,9 @@ export default function CalendarPage() {
   const [start, setStart] = useState<string | null>(null);
   const [end, setEnd] = useState<string | null>(null);
 
-
+  const handleBack = () => {
+    router.back();
+  } 
 
   const handleRequestButton = async () => {
     try{
@@ -59,7 +61,7 @@ export default function CalendarPage() {
 
   // Sample user data
   const user = {
-    name: contextUser?.name as string,
+    name: contextUser?.name as string ?? "USER",
     email: contextUser?.email as string,
     jwt: contextUser?.jwt as string,
   };
@@ -96,7 +98,9 @@ export default function CalendarPage() {
           {/* User Info */}
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-linear-to-br from-accent to-orange-600 flex items-center justify-center text-white font-bold text-lg">
-              <User className="w-6 h-6" />
+              {user.name.split(' ')
+                      .map((n) => n[0])
+                      .join('')}
             </div>
             <div className="flex-1">
               <h1 className="text-lg font-bold text-foreground">{user.name}</h1>
@@ -106,42 +110,17 @@ export default function CalendarPage() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
-              <Bell className="w-6 h-6 text-foreground" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full"></span>
-            </button>
-
-            {/* Profile Dropdown */}
+            {/* Profile back */}
             <div className="relative">
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors"
+                onClick={() => handleBack()}
+                className="inline-flex items-center gap-2 cursor-pointer
+                rounded-full bg-orange-600 px-4 py-2
+              text-white font-medium
+              hover:bg-orange-500 transition"
               >
-                <span className="text-sm font-medium text-foreground">Menu</span>
-                <ChevronDown
-                  className={`w-5 h-5 text-foreground transition-transform ${
-                    isDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
+                ← Back
               </button>
-
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-lg shadow-xl z-50">
-                  <button className="w-full text-left px-4 py-3 hover:bg-muted transition-colors flex items-center gap-2 text-foreground">
-                    <span>Profile</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-muted transition-colors flex items-center gap-2 text-foreground">
-                    <span>Settings</span>
-                  </button>
-                  <hr className="my-2 border-border" />
-                  <button className="w-full text-left px-4 py-3 hover:bg-muted transition-colors flex items-center gap-2 text-destructive">
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -155,7 +134,7 @@ export default function CalendarPage() {
           <h2 className="text-3xl font-bold text-foreground mb-2">Calendar</h2>
           <p className="text-muted-foreground">
             {leaveType
-              ? `Select dates for your ${leaveType} request`
+              ? `Select range of dates for your ${leaveType} request`
               : 'Select dates to request or view your leave applications'}
           </p>
         </div>
