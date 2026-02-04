@@ -208,13 +208,13 @@ export default function RequestsPage() {
         </div>
 
         {/* Request Cards Grid */}
-        {loading && (
+        {loading ? (
             <div className="col-span-full flex items-center justify-center gap-2 py-12 text-muted-foreground">
               <Loader2 className="w-6 h-6 animate-spin" />
               <span>Loading  Requests...</span>
             </div>
-          )}
-        {filteredRequests.length > 0 ? (
+          ) : 
+        filteredRequests.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRequests.map((request, index) => (
               <div

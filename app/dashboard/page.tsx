@@ -5,6 +5,7 @@ import LeaveBalanceCard from '@/components/leave-balance';
 import { ChevronDown, Calendar, LogOut, Loader2, AlertCircle } from 'lucide-react';
 import { useUser } from '@/lib/user-context';
 import { useRouter } from 'next/navigation';
+import UserNotFound from '@/components/UserNotFound';
 
 interface LeaveBalance {
   leaveType: string;
@@ -76,7 +77,7 @@ export default function DashboardPage() {
     // You can add navigation or modal logic here
   };
 
-  return (
+  return token == '' ? <UserNotFound/> : (
     <div className="min-h-screen bg-linear-to-br from-background to-muted">
       {/* Header */}
       <header className="bg-white border-b border-border shadow-sm sticky top-0 z-50">
